@@ -8,9 +8,7 @@ This notebook delves into enhancing an existing C-based chess engine through par
 ## Root Splitting
 The main idea of this technique is to ensure that each node except for the root, is visited by only one processor. To keep the effect of the alpha beta pruning, we split the children nodes of the root into clusters, each cluster being served by only one thread. Each child is then processed as the root of a sub search tree that will be visited in a sequential fashion, thus respecting the alpha beta constraints. When a thread finishes computing it’s subtree(s) and returns its evaluation to the root node, that evaluation is compared to the current best evaluation (that’s how minimax works), and that best evaluation may be updated. So to ensure coherent results, given that multiple threads may be returning to the root node at the same time, threads must do this part of the work in mutual exclusion: meaning that comparing to and updating the best evaluation of the root node must be inside a critical section so that it’s execution remains sequential. And that’s about everything about this algorithm!
 
-Given the time allowed for this project and the relative simplicity of implementation, we came to choose this algorithm for our project. We used the openmp library to do multithreading for its simplicity and efficiency. The full implementation of the root splitting algorithm can be found on the repository. We'll just illustrate the key (changed) parts of the original C code here.
-
-![Root_splitting](https://github.com/nikhilsharmaaz/ChessEngineParallelization/assets/109811920/dc237cc6-9a15-4c7f-b59b-9ad3ef71bc4b)
+We'll just illustrate the key (changed) parts of the original C code here.
 
 We said that we parallelize at the root level, so for that we parallelize the for loop that iterates over the children of the root node for calling the minimax function on them. for that, we use the following two openmp directives:
 
